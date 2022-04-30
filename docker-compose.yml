@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+  backend:
+    image: jorenvo:jxr-backend
+    volumes:
+      - /Users/jvo/Code:/jxr-indexed-code:ro
+
+  cors-proxy:
+    image: node
+    command: sh -c "npx http-server -c-1 -p 81 --cors --proxy 'http://backend'"
+    volumes:
+      - /Users/jvo/Code:/jxr-indexed-code:ro
+    ports:
+      - 8000:81
+
+  frontend:
+    image: jorenvo:jxr-frontend
+    ports:
+      - 9000:80
+    environment:
+      JXR_BACKEND: http://localhost:8000
+      JXR_INDEXED_CODE_ROOT: jxr-indexed-code
+    # have to rebuild to have the right JXR_BACKEND
+    command: sh -c "npm run build && npm run server"
+
+    # test:
+    #   image: alpine:latest
+    #   command: sh -c "apk add --no-cache curl && sleep 9999"
+
